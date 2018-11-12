@@ -328,7 +328,7 @@ map tp :tabp<CR>
 
 " term-mode
 map <F2> :below 10sp term://$SHELL<CR>i
-map <F4> :below 10sp term:///usr/bin/node<CR>i
+map <F4> :below 10sp term:///usr/local/bin/node<CR>i
 
 " yank to system clipboard
 nmap <F8> "+yy
@@ -490,9 +490,9 @@ let g:UltiSnipsExpandTrigger="<C-j>"
 
 " ALE {{{
 " let g:ale_set_baloons = 1
-" let g:ale_set_quickfix = 1
-let g:ale_set_loclist = 1
-let g:ale_keep_list_window_open = 1
+let g:ale_set_quickfix = 1
+" let g:ale_set_loclist = 0
+let g:ale_keep_list_window_open = 0
 let g:ale_list_window_size = 6
 let g:ale_completion_enabled = 1
 let g:ale_lint_on_text_changed = 'never'
@@ -521,6 +521,8 @@ let g:ale_fixers = {}
 let g:ale_fixers['javascript'] = ['prettier']
 let g:ale_fixers['json'] = ['prettier']
 let g:ale_fixers['css'] = ['prettier']
+let g:ale_fixers['svg'] = ['prettier']
+let g:ale_fixers['html'] = ['prettier']
 
 nnoremap ,e :ALENextWrap<cr>
 nnoremap ,d :ALEFindReferences<cr>
