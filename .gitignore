@@ -3,4 +3,8 @@
 .tern-port
 .vim/autoload
 .vim/plugged
+.vim/dirs
 .config/nvim/autoload
+.config/nvim/autoload
+.config/nvim/plugged
+.config/nvim/dirs
