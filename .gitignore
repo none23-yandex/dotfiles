@@ -6,7 +6,10 @@
 .vim/autoload
 .vim/sessions
 .config/nvim
-
-
-
+.config/nvim/autoload
+.vim/plugged
+.config/nvim/autoload
+.vim/autoload
 *.log
+.*.pyc
+__pycache__

@@ -4,7 +4,7 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
 export EDITOR=nvim
-export VISUAL=nvim
+export VISUAL="konsole -e nvim"
 
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
@@ -29,6 +29,7 @@ eval $(keychain --eval --quiet id_rsa)
 
 # zstyle completions {{{
 zstyle :compinstall filename '/Users/none23/.zshrc'
+zstyle ":completion:*:commands" rehash 1 # do not trust completions cache
 zstyle ':acceptline' rehash true
 zstyle ':completion:*:*:*:users' ignored-patterns \
     adm apache bin daemon games gdm halt ident junkbust lp mail mailnull \
@@ -55,6 +56,7 @@ autoload -U colors && colors
 # prompt off
 powerline-daemon -q
 . /usr/local/lib/python3.6/site-packages/powerline/bindings/zsh/powerline.zsh
+#. /usr/lib/python3.7/site-packages/powerline/bindings/zsh/powerline.zsh
 
 # }}}
 # profile
@@ -71,13 +73,24 @@ source ~/.zsh-syntax-highlighting/zsh-syntax-highlighting.zsh 2> /dev/null || \
 # source /usr/bin/virtualenvwrapper.sh
 
 # fzf
+# Use fd instead of the default find command for listing path candidates.
+_fzf_compgen_path() {
+  fd --hidden --follow --exclude ".git" . "$1"
+}
+
+# Use fd to generate the list for directory completion
+_fzf_compgen_dir() {
+  fd --type d --hidden --follow --exclude ".git" . "$1"
+}
 function install_fzf {
   git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
   ~/.fzf/install
 }
-
 source ~/.fzf/shell/completion.zsh 2> /dev/null || install_fzf
 source ~/.fzf/shell/key-bindings.zsh
+
+export FZF_DEFAULT_COMMAND='(git ls-tree -r --name-only HEAD || fd --type f --exclude coverage --exclude node_modules --exclude flow-typed) 2> /dev/null'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 # zshrc-local
 [[ -a ~/.zshrc-pre ]] && source ~/.zshrc-pre || touch ~/.zshrc-pre
@@ -88,9 +101,6 @@ source ~/.fzf/shell/key-bindings.zsh
   . ~/.npm-global/lib/node_modules/serverless/node_modules/tabtab/.completions/serverless.zsh
 [[ -f ~/.npm-global/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.zsh ]] && \
   . ~/.npm-global/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.zsh
-
-# nvm
-[[ -f /usr/share/nvm/init-nvm.sh ]] && source /usr/share/nvm/init-nvm.sh
 
 # git-prompt
 source "/usr/local/opt/zsh-git-prompt/zshrc.sh"

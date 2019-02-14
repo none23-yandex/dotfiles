@@ -17,6 +17,7 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'kien/tabman.vim'
 Plug 'mileszs/ack.vim'
+Plug 'lambdalisue/suda.vim'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-fugitive'
 Plug 'terryma/vim-expand-region'
@@ -28,6 +29,8 @@ Plug 'airblade/vim-gitgutter'
 Plug 'scrooloose/nerdtree'
 Plug 'Xuyuanp/nerdtree-git-plugin'
 
+Plug 'wakatime/vim-wakatime'
+
 Plug 'sheerun/vim-polyglot'
 Plug 'w0rp/ale'
 " Plug 'elzr/vim-json', { 'for': ['json'] }
@@ -36,9 +39,9 @@ Plug 'w0rp/ale'
 " Plug 'tpope/vim-haml'
 Plug 'hhsnopek/vim-sugarss'
 Plug 'ap/vim-css-color'
-" Plug 'wavded/vim-stylus', { 'for': ['stylus'] }
-" Plug 'kewah/vim-stylefmt', { 'for': ['css', 'scss', 'stylus', 'sugarss'] }
-" Plug 'alampros/vim-styled-jsx', { 'for': ['javascript', 'javascript.jsx'] }
+Plug 'alampros/vim-styled-jsx', { 'for': ['javascript', 'javascript.jsx'] }
+Plug 'styled-components/vim-styled-components', { 'branch': 'main' }
+
 
 " Plug 'mattn/webapi-vim' " <----------╮
 " Plug 'mattn/gist-vim' " dependancy --╯
@@ -135,6 +138,9 @@ set virtualedit=block
 set foldmethod=syntax
 set foldlevel=999
 autocmd FileType zsh,bash,shell,vim setlocal foldmethod=marker
+
+" fix syntax highlightiing in .flow files
+autocmd BufRead *.{js,jsx,mjs,jsm,es,es6,flow} setfiletype javascript
 
 " enable concealment
 set conceallevel=1
@@ -273,7 +279,8 @@ endif
 
 " Misc mappings {{{
 " save with sudo
-ca w!! w !sudo tee "%"
+ca w!! w suda://%
+
 
 " save with C-s
 nnoremap <C-s> :w<CR>
@@ -399,11 +406,11 @@ let g:choosewin_statusline_replace = 1
 let g:choosewin_return_on_single_win = 1
 
 let g:choosewin_color_label =           { 'gui': ['#111111', '#ffffff'], 'cterm': [235, 250, 'bold'] }
-let g:choosewin_color_label_current =   { 'gui': ['#ff6600', '#000000'], 'cterm': [202, 233, 'bold'] }
-let g:choosewin_color_land =            { 'gui': ['#ff6600', '#000000'], 'cterm': [202, 233] }
+let g:choosewin_color_label_current =   { 'gui': ['#de5e1e', '#000000'], 'cterm': [202, 233, 'bold'] }
+let g:choosewin_color_land =            { 'gui': ['#de5e1e', '#000000'], 'cterm': [202, 233] }
 let g:choosewin_color_other =           { 'gui': ['#111111', '#000000'], 'cterm': [235, 233] }
 let g:choosewin_color_overlay =         { 'gui': ['#111111', '#ffffff'], 'cterm': [235, 250] }
-let g:choosewin_color_overlay_current = { 'gui': ['#ff6600', '#000000'], 'cterm': [202, 233] }
+let g:choosewin_color_overlay_current = { 'gui': ['#de5e1e', '#000000'], 'cterm': [202, 233] }
 nmap  <C-w><Leader>  <Plug>(choosewin)
 
 " }}}
@@ -440,7 +447,7 @@ let g:deoplete#omni#functions.javascript = [
 \]
 let g:deoplete#sources = {}
 let g:deoplete#sources['javascript'] = ['ultisnips', 'flow', 'ternjs', 'arround', 'buffer']
-" let g:deoplete#sources['javascript'] = ['ultisnips', 'ternjs', 'flow', 'buffer']
+
 inoremap <expr><C-h> deoplete#smart_close_popup()."\<C-h>"
 inoremap <expr><BS> deoplete#smart_close_popup()."\<C-h>"
 
@@ -477,9 +484,8 @@ nmap ga <Plug>(EasyAlign)
 " }}}
 
 " Emmet {{{
-let g:user_emmet_mode='a'
-let g:user_emmet_install_global = 0
-autocmd FileType html,javascript.jsx EmmetInstall
+let g:user_emmet_settings = { 'javascript.jsx': { 'extends': 'jsx', 'attribute_name': { 'for': 'htmlFor', 'class': 'className' }, 'quote_char': '"' } }
+autocmd FileType javascript.jsx EmmetInstall
 
 " }}}
 
@@ -490,39 +496,49 @@ let g:UltiSnipsExpandTrigger="<C-j>"
 
 " ALE {{{
 " let g:ale_set_baloons = 1
-let g:ale_set_quickfix = 1
-" let g:ale_set_loclist = 0
+let g:ale_set_quickfix = 0
+ let g:ale_set_loclist = 1
 let g:ale_keep_list_window_open = 0
 let g:ale_list_window_size = 6
 let g:ale_completion_enabled = 1
+
 let g:ale_lint_on_text_changed = 'never'
 " let g:ale_lint_on_text_changed = 'normal'
 " let g:ale_lint_on_enter = 0
 " g:ale_lint_on_insert_leave = 1
 let g:ale_lint_delay = -1
+let g:ale_fix_on_save = 1
+
+let g:ale_linters = {}
+let g:ale_linters['javascript'] = ['flow', 'eslint'] 
+let g:ale_linters['css'] = ['stylelint'] 
+let g:ale_linters['scss'] = ['stylelint'] 
+
+let g:ale_fixers = {}
+let g:ale_fixers['javascript'] = ['prettier', 'eslint']
+let g:ale_fixers['json'] = ['prettier']
+let g:ale_fixers['css'] = ['prettier', 'stylelint']
+let g:ale_fixers['scss'] = ['prettier', 'stylelint']
+
+let g:ale_javascript_eslint_suppress_missing_config = 1
+let g:ale_javascript_eslint_suppress_eslintignore = 1
+let g:ale_javascript_prettier_use_local_config = 1
+
 let g:ale_change_sign_column_color = 0
 let g:ale_sign_column_always = 1
 let g:ale_set_signs = 1
 let g:ale_open_list = 1
 let g:ale_echo_cursor = 1
 " let g:ale_cursor_detail = 1
-let g:ale_echo_msg_format = '%s (%linter%) - %[code]%'
-
-
-" let g:ale_linters = { 'javascript': ['flow', 'eslint', 'stylelint'] }
-let g:ale_linters = { 'javascript': ['flow', 'eslint'] }
-let g:ale_javascript_eslint_suppress_eslintignore = 1
-let g:ale_javascript_eslint_suppress_missing_config = 1
-let g:ale_javascript_prettier_use_local_config = 1
-
-let g:ale_fix_on_save = 1
-
-let g:ale_fixers = {}
-let g:ale_fixers['javascript'] = ['prettier']
-let g:ale_fixers['json'] = ['prettier']
-let g:ale_fixers['css'] = ['prettier']
-let g:ale_fixers['svg'] = ['prettier']
-let g:ale_fixers['html'] = ['prettier']
+let g:ale_echo_msg_format = '%s (%linter%) %[code]%'
+let g:ale_echo_msg_error_str = '🔥'
+let g:ale_echo_msg_warning_str = '💩'
+let g:ale_echo_msg_info_str = '👉'
+let g:ale_sign_error = '🔥'
+let g:ale_sign_warning = '💩'
+let g:ale_sign_style_error = '💩'
+let g:ale_sign_style_warning = '💩'
+let g:ale_sign_info = '👉'
 
 nnoremap ,e :ALENextWrap<cr>
 nnoremap ,d :ALEFindReferences<cr>
@@ -534,15 +550,6 @@ augroup CloseLoclistWindowGroup
   autocmd!
   autocmd QuitPre * if empty(&buftype) | lclose | endif
 augroup END
-
-let g:ale_echo_msg_error_str = '🔥'
-let g:ale_echo_msg_warning_str = '💩'
-let g:ale_echo_msg_info_str = '💬'
-let g:ale_sign_error = '🔥'
-let g:ale_sign_warning = '💩'
-let g:ale_sign_style_error = '⚑'
-let g:ale_sign_style_warning = '⚐'
-let g:ale_sign_info = 'i'
 
 " }}}
 
@@ -576,19 +583,19 @@ nmap <F5> :NERDTreeToggle<CR>
 
 " }}}
 
-" Vim Session {{{
-let g:session_autosave = 'yes'
+" " Vim Session {{{
+" let g:session_autosave = 'yes'
 
-" automatically (silently) save current working session every 5 minutes
-let g:session_autosave_periodic = 5
-let g:session_autosave_silent = 1
+" " automatically (silently) save current working session every 5 minutes
+" let g:session_autosave_periodic = 5
+" let g:session_autosave_silent = 1
 
-" when prompting do not include instructions on disabling prompting
-let g:session_verbose_messages = 0
+" " when prompting do not include instructions on disabling prompting
+" let g:session_verbose_messages = 0
 
-let g:session_autosave = 'no'
-let g:session_autoload = 'no'
+" let g:session_autosave = 'no'
+" let g:session_autoload = 'no'
 
-" }}}
+" " }}}
 
 " vim:syntax=vim
